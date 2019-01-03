@@ -160,6 +160,10 @@ public class CpioHeader {
 		return Integer.parseInt( readChars( buffer, 8).toString(), 16);
 	}
 
+	protected void skipEight( CharBuffer buffer) {
+		readChars( buffer, 8);
+	}
+
 	protected CharSequence readChars( CharBuffer buffer, int length) {
 		if ( buffer.remaining() < length) throw new IllegalStateException( "Buffer has '" + buffer.remaining() + "' bytes but '" + length + "' are needed.");
 		try {
@@ -195,7 +199,10 @@ public class CpioHeader {
 
 		final CharSequence magic = readSix( buffer);
 		if ( !MAGIC.equals(magic.toString())) throw new IllegalStateException( "Invalid magic number '" + magic + "' of length '" + magic.length() + "'.");
-		inode = readEight( buffer);
+
+		// Dirty ; avoid 64bit collision
+		skipEight(buffer);
+		inode = 0;
 		
 		final int mode = readEight( buffer);
 		permissions = mode & 07777;
